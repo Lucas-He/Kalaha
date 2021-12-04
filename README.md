@@ -16,4 +16,5 @@ Button Auto Move: Uses the AI to find a good move and applies it
 Field Buttons: Clicking a field button will take it's marbles and distribute them according to the rules
 
 The last clicked Button will appear green (for human and AI)
-Edit: On Rule is still missing (if you end up in a goal field you should be allowed to go again. I'll add that later)
+
+Edit: Added if you end up in a goal field you MUST! go again. (Not sure if you have the option to pass)
