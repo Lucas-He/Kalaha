@@ -20,7 +20,10 @@ def start_minimax(field, goals, player, sp=1, md=3):
     ab=[-np.inf, np.inf]
     for cm, m in enumerate(moves):
         undo_inf = apply_move(field, goals, player, m)
-        move_vals[cm] = min_s(field, goals, (player+1)%2, d=1, ab=ab[:2], sp=sp, md=md)
+        if undo_inf[5] == 1:
+            move_vals[cm] = max_s(field, goals, player, d=1, ab=ab[:2], sp=sp, md=md)
+        else:
+            move_vals[cm] = min_s(field, goals, (player+1)%2, d=1, ab=ab[:2], sp=sp, md=md)
         undo_move(field, goals, player, undo_inf)
         if move_vals[cm] > ab[0]:
             ab[0] = move_vals[cm]
@@ -51,7 +54,10 @@ def min_s(field, goals, player, d, ab, sp, md):
     move_vals = np.zeros(len(moves))
     for cm, m in enumerate(moves):
         undo_inf = apply_move(field, goals, player, m)
-        move_vals[cm] = max_s(field, goals, (player+1)%2, d=d+1, ab=ab[:2], sp=sp, md=md)
+        if undo_inf[5] == 1:
+            move_vals[cm] = min_s(field, goals, player, d=d+1, ab=ab[:2], sp=sp, md=md)
+        else:
+            move_vals[cm] = max_s(field, goals, (player+1)%2, d=d+1, ab=ab[:2], sp=sp, md=md)
         undo_move(field, goals, player, undo_inf)
         if move_vals[cm] < ab[1]:
             ab[1] = move_vals[cm]
@@ -79,7 +85,10 @@ def max_s(field, goals, player, d, ab, sp, md):
     move_vals = np.zeros(len(moves))
     for cm, m in enumerate(moves):
         undo_inf = apply_move(field, goals, player, m)
-        move_vals[cm] = min_s(field, goals, (player+1)%2, d=d+1, ab=ab[:2], sp=sp, md=md)
+        if undo_inf[5] == 1:
+            move_vals[cm] = max_s(field, goals, player, d=d+1, ab=ab[:2], sp=sp, md=md)
+        else:
+            move_vals[cm] = min_s(field, goals, (player+1)%2, d=d+1, ab=ab[:2], sp=sp, md=md)
         undo_move(field, goals, player, undo_inf)
         if move_vals[cm] > ab[0]:
             ab[0] = move_vals[cm]
@@ -100,10 +109,11 @@ def apply_move(field, goals, player, move):
     field[player, move] = 0
     field += to_all
     goals[player] += to_all
-    undo_info = np.zeros(5).astype(int) - 1
+    undo_info = np.zeros(6).astype(int) - 1
     undo_info[:2] = np.array([move, to_distrib])
     row_to_check = -1
     fin_p = -1
+    ended_in_goal = 0
     if player == 0:
         if rest <= move:
             field[0][move-rest:move] += 1
@@ -114,6 +124,7 @@ def apply_move(field, goals, player, move):
             goals[0] += 1
             row_to_check = -1
             fin_p = -1
+            ended_in_goal = 1
         elif rest <= move + 1 + n:
             field[0][:move] += 1
             goals[0] += 1
@@ -148,6 +159,7 @@ def apply_move(field, goals, player, move):
             goals[1] += 1
             row_to_check = -1
             fin_p = -1
+            ended_in_goal = 1
         elif rest <= 2 * n - move:
             field[1][move+1:] += 1
             goals[1] += 1
@@ -172,11 +184,12 @@ def apply_move(field, goals, player, move):
                 undo_info[2] = -1
         else:
             undo_info[2] = -1
+    undo_info[5] = ended_in_goal
     return undo_info
         
 
 def undo_move(field, goals, player, undo_info):
-    # Undo_info: [move, to_distrib, row_to_check, own_m, op_m]
+    # Undo_info: [move, to_distrib, row_to_check, own_m, op_m, extra_move]
     n = len(field[0])
     from_all = undo_info[1] // (2*n + 1)
     rest = undo_info[1] % (2*n + 1)

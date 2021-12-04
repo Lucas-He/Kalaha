@@ -60,6 +60,10 @@ class Kalaha_GUI(tk.Frame):
         self.Label_DI = tk.Label(self, text="2-10", anchor="w")
         self.Label_DI.pack(side="left")
         self.Label_DI.place(y=35,x=420, height=30, width=50)
+        # Player Turn Text
+        self.player_turn = tk.Label(self, text="", anchor="w")
+        self.player_turn.pack(side="left")
+        self.player_turn.place(y=35,x=0, height=30, width=100)
         #---------------------------------#
         self.game_over = 0
         self.move_list = []
@@ -104,6 +108,7 @@ class Kalaha_GUI(tk.Frame):
                 u.destroy()
  
     def create_visual_field(self):
+        self.player_turn.configure(text="Player: %d"%self.player)
         self.field_buttons = []
         self.button_count = 0
         for i in range(2):
@@ -128,41 +133,49 @@ class Kalaha_GUI(tk.Frame):
             if self.player == 0:
                 if pos < self.n and self.field[self.player, pos] != 0:
                     ui = Kalaha.apply_move(self.field, self.goals, self.player, pos)
-                    self.player = (self.player + 1) % 2
+                    if ui[5] != 1:
+                        self.player = (self.player + 1) % 2
                     self.update_visual_field(pos)
                     self.last_move = pos
                     self.move_list.append(ui)
             else:
                 if pos >= self.n and self.field[self.player, pos%self.n] != 0:
                     ui = Kalaha.apply_move(self.field, self.goals, self.player, pos%self.n)
-                    self.player = (self.player + 1) % 2
+                    if ui[5] != 1:
+                        self.player = (self.player + 1) % 2
                     self.update_visual_field(pos)
                     self.last_move = pos
                     self.move_list.append(ui)
+            self.check_game_over()
                 
     def auto(self):
         if not self.game_over:
             if self.player == 0:
                 cm, cv = Kalaha.start_minimax(self.field, self.goals, self.player, sp=1, md=self.depth)
                 aui = Kalaha.apply_move(self.field, self.goals, self.player, cm)
-                self.player = (self.player + 1) % 2
+                if aui[5] != 1:
+                    self.player = (self.player + 1) % 2
                 self.update_visual_field(cm)
                 self.last_move = cm
                 self.move_list.append(aui)
             else:
                 cm, cv = Kalaha.start_minimax(self.field, self.goals, self.player, sp=-1, md=self.depth)
                 aui = Kalaha.apply_move(self.field, self.goals, self.player, cm)
-                self.player = (self.player + 1) % 2
+                if aui[5] != 1:
+                    self.player = (self.player + 1) % 2
                 self.update_visual_field(self.n + cm)
                 self.last_move = self.n + cm
                 self.move_list.append(aui)
+            self.check_game_over()
     
     def undo(self):
         if len(self.move_list) != 0:
-            self.player = (self.player + 1) % 2
+            if self.move_list[-1][5] != 1:
+                self.player = (self.player + 1) % 2
             Kalaha.undo_move(self.field, self.goals, self.player, self.move_list[-1])
             del self.move_list[-1]
             self.update_visual_field(self.last_move)
+            self.check_game_over()
         
     
     def update_visual_field(self, green_space):
@@ -172,8 +185,18 @@ class Kalaha_GUI(tk.Frame):
                 self.field_buttons[i*self.n + j].configure(text="%d"%self.field[i, j])
         self.goal_labels[0].configure(text="%d"%self.goals[0])
         self.goal_labels[1].configure(text="%d"%self.goals[1])
+        if self.player == 0:
+            self.player_turn.configure(text="Player: 2")
+        else:
+            self.player_turn.configure(text="Player: 1")
         self.field_buttons[green_space].configure(bg="green")
     
+    def check_game_over(self):
+        if np.sum(self.field[self.player]) == 0:
+            self.game_over = 1
+        else:
+            self.game_over = 0
+        
     def fail(self):
         text_fail = "Check Inputs!"
         self.Label_fail.configure(text=text_fail)
@@ -184,7 +207,6 @@ if __name__ == "__main__":
     app.pack(fill="both", expand=True)
     #Example(root).pack(fill="both", expand=True)
     root.mainloop()
-    app.close()
     layout = None
     window = None
     gc.collect()
