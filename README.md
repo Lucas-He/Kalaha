@@ -1,5 +1,6 @@
 # Kalaha
 Kalaha GUI and Engine
+
 If you want to test it simply run Kalaha_GUI.py
 
 Field Length N: The amount of fields
