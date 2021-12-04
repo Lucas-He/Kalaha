@@ -38,12 +38,12 @@ def start_minimax(field, goals, player, sp=1, md=3):
 def min_s(field, goals, player, d, ab, sp, md):
     if d==md:
         return sp*evaluate(goals)
-    if np.sum(field[player]) == 0:
-        if goals[player] - goals[(player+1)%2] > 0:
+    if np.sum(field[0]) == 0 or np.sum(field[1]) == 0:
+        if np.sum(field[player]) + goals[player] - (np.sum(field[(player+1)%2]) + goals[(player+1)%2]) > 0:
             if d==1:
                 return -9999
             return -999
-        elif goals[player] - goals[(player+1)%2] < 0:
+        elif np.sum(field[player]) + goals[player] - (np.sum(field[(player+1)%2]) + goals[(player+1)%2]) < 0:
             if d==1:
                 return 9999
             return 999
@@ -69,12 +69,12 @@ def min_s(field, goals, player, d, ab, sp, md):
 def max_s(field, goals, player, d, ab, sp, md):
     if d==md:
         return sp*evaluate(goals)
-    if np.sum(field[player]) == 0:
-        if goals[player] - goals[(player+1)%2] > 0:
+    if np.sum(field[0]) == 0 or np.sum(field[1]) == 0:
+        if np.sum(field[player]) + goals[player] - (np.sum(field[(player+1)%2]) + goals[(player+1)%2]) > 0:
             if d==1:
                 return 9999
             return 999
-        elif goals[player] - goals[(player+1)%2] < 0:
+        elif np.sum(field[player]) + goals[player] - (np.sum(field[(player+1)%2]) + goals[(player+1)%2]) < 0:
             if d==1:
                 return -9999
             return -999

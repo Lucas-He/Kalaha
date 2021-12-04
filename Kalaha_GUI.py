@@ -192,7 +192,7 @@ class Kalaha_GUI(tk.Frame):
         self.field_buttons[green_space].configure(bg="green")
     
     def check_game_over(self):
-        if np.sum(self.field[self.player]) == 0:
+        if np.sum(self.field[0]) == 0 or np.sum(self.field[1]) == 0:
             self.game_over = 1
         else:
             self.game_over = 0
