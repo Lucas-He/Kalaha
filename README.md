@@ -5,7 +5,7 @@ If you want to test it simply run Kalaha_GUI.py
 
 Field Length N: The amount of fields
 
-Filling M: The number of starting marbles in ach field
+Filling M: The number of starting marbles in each field
 
 Search depth d: The depth the AI uses for Minimax
 
