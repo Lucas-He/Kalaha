@@ -40,6 +40,10 @@ class Kalaha_GUI(tk.Frame):
         self.button_Auto = tk.Button(self, text="Auto Move", command = self.auto)
         self.button_Auto.pack(side="right")
         self.button_Auto.place(y=5,x=580,height=30, width=100)
+        # Undo Move Button
+        self.button_Undo = tk.Button(self, text="Undo Move", command = self.undo)
+        self.button_Undo.pack(side="right")
+        self.button_Undo.place(y=5,x=800,height=30, width=100)
         # Fail Text
         self.Label_fail = tk.Label(self, text="", anchor="w")
         self.Label_fail.pack(side="left")
@@ -58,6 +62,7 @@ class Kalaha_GUI(tk.Frame):
         self.Label_DI.place(y=35,x=420, height=30, width=50)
         #---------------------------------#
         self.game_over = 0
+        self.move_list = []
         self.player = 1
         self.dest = 0
         self.last_move = 0
@@ -72,6 +77,7 @@ class Kalaha_GUI(tk.Frame):
         self.destroy_old_field()
         try:
             self.game_over = 0
+            self.move_list = []
             self.player = 1
             self.dest = 0
             self.last_move = 0
@@ -121,31 +127,43 @@ class Kalaha_GUI(tk.Frame):
         if not self.game_over:
             if self.player == 0:
                 if pos < self.n and self.field[self.player, pos] != 0:
-                    _ = Kalaha.apply_move(self.field, self.goals, self.player, pos)
+                    ui = Kalaha.apply_move(self.field, self.goals, self.player, pos)
                     self.player = (self.player + 1) % 2
                     self.update_visual_field(pos)
                     self.last_move = pos
+                    self.move_list.append(ui)
             else:
                 if pos >= self.n and self.field[self.player, pos%self.n] != 0:
-                    _ = Kalaha.apply_move(self.field, self.goals, self.player, pos%self.n)
+                    ui = Kalaha.apply_move(self.field, self.goals, self.player, pos%self.n)
                     self.player = (self.player + 1) % 2
                     self.update_visual_field(pos)
                     self.last_move = pos
+                    self.move_list.append(ui)
                 
     def auto(self):
         if not self.game_over:
             if self.player == 0:
                 cm, cv = Kalaha.start_minimax(self.field, self.goals, self.player, sp=1, md=self.depth)
-                _ = Kalaha.apply_move(self.field, self.goals, self.player, cm)
+                aui = Kalaha.apply_move(self.field, self.goals, self.player, cm)
                 self.player = (self.player + 1) % 2
                 self.update_visual_field(cm)
                 self.last_move = cm
+                self.move_list.append(aui)
             else:
                 cm, cv = Kalaha.start_minimax(self.field, self.goals, self.player, sp=-1, md=self.depth)
-                _ = Kalaha.apply_move(self.field, self.goals, self.player, cm)
+                aui = Kalaha.apply_move(self.field, self.goals, self.player, cm)
                 self.player = (self.player + 1) % 2
                 self.update_visual_field(self.n + cm)
                 self.last_move = self.n + cm
+                self.move_list.append(aui)
+    
+    def undo(self):
+        if len(self.move_list) != 0:
+            self.player = (self.player + 1) % 2
+            Kalaha.undo_move(self.field, self.goals, self.player, self.move_list[-1])
+            del self.move_list[-1]
+            self.update_visual_field(self.last_move)
+        
     
     def update_visual_field(self, green_space):
         self.field_buttons[self.last_move].configure(bg="white")
