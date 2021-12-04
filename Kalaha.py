@@ -139,7 +139,7 @@ def apply_move(field, goals, player, move):
             row_to_check = move + 1 + 2*n - rest
             fin_p = 0
         if row_to_check != -1 and fin_p == 0 and field[0][row_to_check] == 1:
-            if field[1][row_to_check] > 1:
+            if field[1][row_to_check] >= 1:
                 goals[0] += field[0][row_to_check] + field[1][row_to_check]
                 undo_info[3] = field[0][row_to_check]
                 undo_info[4] = field[1][row_to_check]
@@ -174,7 +174,7 @@ def apply_move(field, goals, player, move):
             row_to_check = rest-n-(n-move)-1
             fin_p = 1
         if row_to_check != -1 and fin_p == 1 and field[1][row_to_check] == 1:
-            if field[0][row_to_check] > 1:
+            if field[0][row_to_check] >= 1:
                 goals[1] += field[0][row_to_check] + field[1][row_to_check]
                 undo_info[3] = field[1][row_to_check]
                 undo_info[4] = field[0][row_to_check]
