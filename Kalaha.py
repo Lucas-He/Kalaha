@@ -13,6 +13,28 @@ goals = np.zeros(2).astype(int)
 # Player
 player = 0
 """
+def agent(state):
+    switch = False
+    # If the enumeration of the pits is from left to right use
+    # switch = True else use switch = False
+    field = np.zeros((2, state.size)).astype(int)
+    field[0, :] = state.south_pits
+    field[1, :] = state.north_pits
+    goals = np.zeros(2).astype(int)
+    goals[0] = state.south
+    goals[1] = state.north
+    for i in range(3, 15):
+        current_move = start_minimax(field, goals, player=0, md=i)[0]
+        if switch:
+            yield switch_move_position(state.size, current_move)
+        else:
+            yield current_move
+    
+
+def switch_move_position(field_len, move):
+    return field_len - move - 1
+
+
 def start_minimax(field, goals, player, sp=1, md=3):
     moves = find_moves(field, player)
     moves = quick_eval(field, moves, player)
@@ -37,7 +59,7 @@ def start_minimax(field, goals, player, sp=1, md=3):
 
 def min_s(field, goals, player, d, ab, sp, md):
     if d==md:
-        return sp*evaluate(goals)
+        return sp*evaluate(goals)#, field)
     if np.sum(field[0]) == 0 or np.sum(field[1]) == 0:
         if np.sum(field[player]) + goals[player] - (np.sum(field[(player+1)%2]) + goals[(player+1)%2]) > 0:
             if d==1:
@@ -68,7 +90,7 @@ def min_s(field, goals, player, d, ab, sp, md):
 
 def max_s(field, goals, player, d, ab, sp, md):
     if d==md:
-        return sp*evaluate(goals)
+        return sp*evaluate(goals)#, field)
     if np.sum(field[0]) == 0 or np.sum(field[1]) == 0:
         if np.sum(field[player]) + goals[player] - (np.sum(field[(player+1)%2]) + goals[(player+1)%2]) > 0:
             if d==1:
@@ -97,8 +119,8 @@ def max_s(field, goals, player, d, ab, sp, md):
     return np.max(move_vals)
 
 
-def evaluate(goals):
-    return goals[0] - goals[1]
+def evaluate(goals):#, field):
+    return goals[0] - goals[1]# + 0.2 * (np.sum(field[0]) - np.sum(field[1]))
     
 
 def apply_move(field, goals, player, move):
